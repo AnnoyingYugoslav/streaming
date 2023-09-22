@@ -4,6 +4,7 @@ import os
 import time
 import pytesseract
 from PIL import Image
+from gtts import gTTS
 
 def makeUrl(afterID, subreddit):
     newUrl = subreddit.split('/.json')[0] + "/.json?after={}".format(afterID)
@@ -19,6 +20,14 @@ def downloadImage(imageUrl, imageAmount, save_dir):
             shutil.copyfileobj(r.raw, f)
             print("Successfully downloaded: " + imageUrl)
             imageAmount += 1
+    if extension != 'png':
+        try:
+            image = Image.open(filename)
+            png_filename = os.path.splitext(filename)[0] + '.png'
+            image.save(png_filename, 'PNG')
+            print(f"Converted to PNG: {filename} -> {png_filename}")
+        except Exception as e:
+            print(f"Error converting to PNG: {filename} - {str(e)}")
     return imageAmount
 
 def runDownload():
@@ -42,13 +51,29 @@ def runDownload():
             x = downloadImage(_imageUrls[0], x, r'C:\Users\16bit\Desktop\syf z pulpitu\syf')
             if x == limit:
                 break
-def textExtract():
+def textExtract(text):
     path_to_tesseract = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    path_to_image = 'C:\\Users\\16bit\\Desktop\\syf z pulpitu\\syf\\1.jpg'
+    path_to_image = 'C:\\Users\\16bit\\Desktop\\syf z pulpitu\\syf\\1.png'
     pytesseract.tesseract_cmd = path_to_tesseract
     img = Image.open(path_to_image)
-    text = pytesseract.image_to_string(img)
-    print(text)
+    extracted_text = pytesseract.image_to_string(img)
+    extracted_text = extracted_text.replace('\n', '')
+    print(extracted_text)
+    return extracted_text
 
+def readLoud(mtext):
+    language = 'en'
+    myobj = gTTS(text=mtext, lang=language, slow=False)
+    myobj.save("welcome.mp3")
+    os.system("start wmplayer welcome.mp3")
 
-textExtract()
+while True:
+    mytext = ""
+    runDownload()
+    time.sleep(5)
+    mytext = textExtract(mytext)
+    time.sleep(15)
+    print(mytext)
+    if mytext != "":
+        readLoud(mytext)
+    time.sleep(5)
