@@ -51,13 +51,34 @@ def runDownload():
             x = downloadImage(_imageUrls[0], x, r'C:\Users\16bit\Desktop\syf z pulpitu\syf')
             if x == limit:
                 break
+def runDownload2():
+    subreddit = "https://www.reddit.com/r/dankmemes/new"
+    limit = 1
+    subJson = ''
+    x = 0
+    while x < limit:
+        if subJson:
+            url = makeUrl(subJson['data']['after'], subreddit)
+        else:
+            url = makeUrl('', subreddit)
+        subJson = requests.get(url, headers={'User-Agent': 'MyRedditScraper'}).json()
+        post = subJson['data']['children']
+        postCount = range(len(post))
+
+        for i in postCount:
+            imageUrl = (post[i]['data']['url'])
+            _imageUrls = []
+            _imageUrls.append(imageUrl)
+            x = downloadImage(_imageUrls[0], x, r'C:\Users\16bit\Desktop\syf z pulpitu\syf')
+            if x == limit:
+                break
 def textExtract(text):
     path_to_tesseract = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     path_to_image = 'C:\\Users\\16bit\\Desktop\\syf z pulpitu\\syf\\1.png'
     pytesseract.tesseract_cmd = path_to_tesseract
     img = Image.open(path_to_image)
     extracted_text = pytesseract.image_to_string(img)
-    extracted_text = extracted_text.replace('\n', '')
+    extracted_text = extracted_text.replace('\n', ' ')
     print(extracted_text)
     return extracted_text
 
@@ -67,13 +88,23 @@ def readLoud(mtext):
     myobj.save("welcome.mp3")
     os.system("start wmplayer welcome.mp3")
 
+
+counter = 0
 while True:
-    mytext = ""
-    runDownload()
-    time.sleep(5)
-    mytext = textExtract(mytext)
-    time.sleep(15)
-    print(mytext)
-    if mytext != "":
-        readLoud(mytext)
-    time.sleep(5)
+    try:
+        mytext = ""
+        if counter < 4:
+            runDownload()
+            counter += 1
+        else:
+            runDownload2()
+            counter = 0
+        time.sleep(5)
+        mytext = textExtract(mytext)
+        time.sleep(15)
+        print(mytext)
+        if mytext != "":
+            readLoud(mytext)
+        time.sleep(5)
+    except Exception as e:
+        time.sleep(10)
