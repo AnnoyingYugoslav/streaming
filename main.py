@@ -6,6 +6,7 @@ import pytesseract
 from PIL import Image
 from gtts import gTTS
 from langdetect import detect
+from tiktokvoice import tts
 
 def makeUrl(afterID, subreddit):
     newUrl = subreddit.split('/.json')[0] + "/.json?after={}".format(afterID)
@@ -73,6 +74,27 @@ def runDownload2():
             x = downloadImage(_imageUrls[0], x, r'C:\Users\16bit\Desktop\syf z pulpitu\syf')
             if x == limit:
                 break
+def runDownload3():
+    subreddit = "https://www.reddit.com/r/funny/new"
+    limit = 1
+    subJson = ''
+    x = 0
+    while x < limit:
+        if subJson:
+            url = makeUrl(subJson['data']['after'], subreddit)
+        else:
+            url = makeUrl('', subreddit)
+        subJson = requests.get(url, headers={'User-Agent': 'MyRedditScraper'}).json()
+        post = subJson['data']['children']
+        postCount = range(len(post))
+
+        for i in postCount:
+            imageUrl = (post[i]['data']['url'])
+            _imageUrls = []
+            _imageUrls.append(imageUrl)
+            x = downloadImage(_imageUrls[0], x, r'C:\Users\16bit\Desktop\syf z pulpitu\syf')
+            if x == limit:
+                break
 def textExtract(text):
     path_to_tesseract = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     path_to_image = 'C:\\Users\\16bit\\Desktop\\syf z pulpitu\\syf\\1.png'
@@ -89,27 +111,38 @@ def readLoud(mtext):
     if test == "en":
         print("English detected")
         language = 'en'
-        myobj = gTTS(text=mtext, lang=language, slow=False)
+        myobj = gTTS(text=mtext, lang=language, tld='co.in')
         myobj.save("welcome.mp3")
         os.system("start wmplayer welcome.mp3")
+def readLoud2(mtext):
+    test = ""
+    test = detect(mtext)
+    if test == "en":
+        print("English detected")
+        tts(mtext, "en_us_001", "welcome.mp3", play_sound=True)
 
 def run():
     counter = 0
     while True:
         try:
             mytext = ""
-            if counter < 4:
+            if counter < 1:
                 runDownload()
                 counter += 1
-            else:
+            elif counter == 2:
                 runDownload2()
+                counter += 1
+            else:
+                runDownload3()
                 counter = 0
             time.sleep(5)
             mytext = textExtract(mytext)
             time.sleep(15)
             print(mytext)
             if mytext != "":
-                readLoud(mytext)
+                readLoud2(mytext)
+            else:
+                os.remove("welcome.mp3")
             time.sleep(5)
         except Exception as e:
             time.sleep(10)
