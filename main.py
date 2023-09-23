@@ -5,6 +5,7 @@ import time
 import pytesseract
 from PIL import Image
 from gtts import gTTS
+from langdetect import detect
 
 def makeUrl(afterID, subreddit):
     newUrl = subreddit.split('/.json')[0] + "/.json?after={}".format(afterID)
@@ -83,28 +84,34 @@ def textExtract(text):
     return extracted_text
 
 def readLoud(mtext):
-    language = 'en'
-    myobj = gTTS(text=mtext, lang=language, slow=False)
-    myobj.save("welcome.mp3")
-    os.system("start wmplayer welcome.mp3")
+    test = ""
+    test = detect(mtext)
+    if test == "en":
+        print("English detected")
+        language = 'en'
+        myobj = gTTS(text=mtext, lang=language, slow=False)
+        myobj.save("welcome.mp3")
+        os.system("start wmplayer welcome.mp3")
 
+def run():
+    counter = 0
+    while True:
+        try:
+            mytext = ""
+            if counter < 4:
+                runDownload()
+                counter += 1
+            else:
+                runDownload2()
+                counter = 0
+            time.sleep(5)
+            mytext = textExtract(mytext)
+            time.sleep(15)
+            print(mytext)
+            if mytext != "":
+                readLoud(mytext)
+            time.sleep(5)
+        except Exception as e:
+            time.sleep(10)
 
-counter = 0
-while True:
-    try:
-        mytext = ""
-        if counter < 4:
-            runDownload()
-            counter += 1
-        else:
-            runDownload2()
-            counter = 0
-        time.sleep(5)
-        mytext = textExtract(mytext)
-        time.sleep(15)
-        print(mytext)
-        if mytext != "":
-            readLoud(mytext)
-        time.sleep(5)
-    except Exception as e:
-        time.sleep(10)
+run()
